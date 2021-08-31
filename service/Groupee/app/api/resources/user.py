@@ -1,39 +1,40 @@
 from flask_restful import Resource, reqparse
-import pandas as pd
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from backend.database.models.user import User
+from backend.database.manager import Manager
 
-
-class User(Resource):
+class UserResouce(Resource):
 
     # GET
     def get(self):
 
-        data = pd.read_csv(r'D:\Programming\Python\Groupee\datasets\test.csv', delimiter='|')
-        data = data.to_dict()
-        return {'data': data}, 200  # return data and our return code
+        pass
 
     def post(self):
 
+        # TODO: Create a DB Manager with singleton access to the session
+        some_engine = create_engine(f'mysql://Groupee_Admin:{Manager.get_db_password()}@127.0.0.1:3306/models')
+        Session = sessionmaker(bind=some_engine)
+        session = Session()
+
         parser = reqparse.RequestParser()  # initialize
 
-        parser.add_argument('userId', required=True)  # add args
-        parser.add_argument('name', required=True)
-        parser.add_argument('city', required=True)
+        parser.add_argument('user_name', required=True)  # add args
+        parser.add_argument('first_name', required=True)
+        parser.add_argument('last_name', required=True)
 
         args = parser.parse_args()  # parse arguments to dictionary
 
-        # create new dataframe containing new values
-        new_data = pd.DataFrame({
-            'userId': args['userId'],
-            'name': args['name'],
-            'city': args['city'],
-            'locations': [[]]
-        })
-        # read our CSV
-        data = pd.read_csv(r'D:\Programming\Python\Groupee\datasets\test.csv', delimiter='|')
-        # add the newly provided values
-        data = data.append(new_data, ignore_index=True)
-        # save back to CSV
-        data.to_csv(r'D:\Programming\Python\Groupee\datasets\test.csv', index=False)
-        return {'data': data.to_dict()}, 200  # return data with 200 OK
+        # create new User model object containing new values
+        new_user = User(id=None,
+                        user_name=args.user_name,
+                        first_name=args.first_name,
+                        last_name=args.last_name)
 
+        session.add(new_user)
+        session.commit()
+        session.close()
+
+        return {'data': 'SUCCESS'}, 200
 
