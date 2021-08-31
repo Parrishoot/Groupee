@@ -1,2 +1,3 @@
 /service/Groupee/.idea*
 /service/db_access.txt
+*__pycache__*.pyc
