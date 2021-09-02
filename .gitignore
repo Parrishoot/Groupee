@@ -1,3 +1,4 @@
 /service/Groupee/.idea*
 /service/db_access.txt
 *.pyc
+/service/Groupee/venv

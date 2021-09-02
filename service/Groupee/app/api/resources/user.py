@@ -1,30 +1,35 @@
 from flask_restful import Resource, reqparse
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
 from backend.database.models.user import User
-from backend.database.manager import Manager
+from backend.database.util import Manager
+
 
 class UserResouce(Resource):
+    """RESOURCE FOR THE USERS"""
 
     # GET
-    def get(self):
+    @staticmethod
+    def get():
 
         pass
 
-    def post(self):
+    # POST
+    @staticmethod
+    def post():
 
-        # TODO: Create a DB Manager with singleton access to the session
-        some_engine = create_engine(f'mysql://Groupee_Admin:{Manager.get_db_password()}@127.0.0.1:3306/models')
-        Session = sessionmaker(bind=some_engine)
-        session = Session()
+        manager = Manager.get_instance()
+        session = manager.db.session
 
-        parser = reqparse.RequestParser()  # initialize
+        # Parse the arguments from the request
+        parser = reqparse.RequestParser()
 
-        parser.add_argument('user_name', required=True)  # add args
+        parser.add_argument('user_name', required=True)
         parser.add_argument('first_name', required=True)
         parser.add_argument('last_name', required=True)
 
-        args = parser.parse_args()  # parse arguments to dictionary
+        args = parser.parse_args()
+
+        # TODO: Validate arguments
 
         # create new User model object containing new values
         new_user = User(id=None,
@@ -32,9 +37,23 @@ class UserResouce(Resource):
                         first_name=args.first_name,
                         last_name=args.last_name)
 
-        session.add(new_user)
-        session.commit()
-        session.close()
+        try:
+            # Add that user to the datbase
+            session.add(new_user)
+            session.commit()
+            session.close()
 
-        return {'data': 'SUCCESS'}, 200
+            # Return a 200 code for success
+            return {'data': 'SUCCESS'}, 200
+
+        # TODO: Add more in depth error handling
+        except IntegrityError as e:
+
+            return {'data': f'Data Integrity Error:\n{e}'}, 400
+
+        except Exception as e:
+
+            return {'data': f'Internal Server Error\n{e}'}, 500
+
+
 

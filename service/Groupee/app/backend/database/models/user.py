@@ -1,10 +1,8 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from backend.database.util import Manager
 
 
-class User(Base):
+class User(Manager.get_instance().db.Model):
 
     # Table name
     __tablename__ = 'user'
