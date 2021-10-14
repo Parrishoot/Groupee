@@ -1,17 +1,24 @@
+import json
 from flask_restful import Resource, reqparse
+from flask import make_response, render_template, url_for, request
 from sqlalchemy.exc import IntegrityError
 from backend.database.models.user import User
 from backend.database.util import Manager
 
 
-class UserResouce(Resource):
+class UserResource(Resource):
     """RESOURCE FOR THE USERS"""
 
     # GET
     @staticmethod
-    def get():
+    def get(id):
 
-        pass
+        # Get the user for the specific ID
+        # user = User.query.get_or_404(id)
+        return {
+            'url': url_for('userresource', id='2'),
+            'url_2': request.root_url
+        }
 
     # POST
     @staticmethod
